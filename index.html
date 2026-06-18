@@ -1,0 +1,2058 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>校园家教助手 - 终极交互原型</title>
+<style>
+/* ===== Reset & Base ===== */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', 'PingFang SC', sans-serif;
+  background: #f0f2f5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+/* ===== Phone Frame ===== */
+.phone-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.phone-title-bar {
+  text-align: center;
+  margin-bottom: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #333;
+  min-height: 20px;
+  letter-spacing: 0.5px;
+}
+.phone-frame {
+  width: 375px;
+  height: 667px;
+  border-radius: 40px;
+  background: linear-gradient(135deg, #E8F0FE 0%, #F3E7FF 50%, #FFE8EC 100%);
+  overflow: hidden;
+  position: relative;
+  box-shadow:
+    0 0 0 3px #1a1a2e,
+    0 0 0 6px #333,
+    0 25px 60px rgba(0,0,0,0.3),
+    0 5px 20px rgba(0,0,0,0.15);
+}
+.phone-notch {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 150px;
+  height: 28px;
+  background: #1a1a2e;
+  border-radius: 0 0 18px 18px;
+  z-index: 100;
+}
+
+/* ===== Screen Base ===== */
+.screen {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.35s ease, transform 0.35s ease;
+  pointer-events: none;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+.screen.active {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+  z-index: 10;
+}
+.screen::-webkit-scrollbar { display: none; }
+
+/* ===== Liquid Glass Components ===== */
+.glass {
+  background: rgba(255,255,255,0.72);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04);
+}
+.glass-strong {
+  background: rgba(255,255,255,0.82);
+  backdrop-filter: blur(24px) saturate(200%);
+  -webkit-backdrop-filter: blur(24px) saturate(200%);
+  border: 1px solid rgba(255,255,255,0.4);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04);
+}
+.glass-subtle {
+  background: rgba(255,255,255,0.5);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 12px;
+}
+
+/* ===== Common Components ===== */
+.nav-bar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  padding: 38px 16px 12px;
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  background: rgba(255,255,255,0.6);
+}
+.nav-back {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  color: #333;
+  cursor: pointer;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.5);
+  border: none;
+  flex-shrink: 0;
+}
+.nav-back:active { background: rgba(0,0,0,0.05); }
+.nav-title {
+  flex: 1;
+  text-align: center;
+  font-size: 17px;
+  font-weight: 600;
+  color: #1a1a2e;
+  margin-right: 32px;
+}
+.tab-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 65px;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 6px 0 18px;
+  background: rgba(255,255,255,0.72);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-top: 1px solid rgba(255,255,255,0.3);
+  z-index: 50;
+}
+.tab-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  cursor: pointer;
+  padding: 4px 12px;
+  border-radius: 12px;
+  transition: all 0.2s;
+  position: relative;
+}
+.tab-item .tab-icon { font-size: 22px; line-height: 1; }
+.tab-item .tab-label { font-size: 10px; color: #999; font-weight: 500; }
+.tab-item.active .tab-label { color: #6C5CE7; font-weight: 600; }
+.tab-item.active { background: rgba(108,92,231,0.08); }
+
+.section-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin: 16px 16px 10px;
+}
+
+/* ===== Screen 1: Welcome ===== */
+.screen-welcome {
+  background: linear-gradient(135deg, #E8F0FE 0%, #F3E7FF 50%, #FFE8EC 100%);
+  padding: 60px 24px 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.welcome-logo {
+  width: 100px;
+  height: 100px;
+  border-radius: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  margin-bottom: 16px;
+  margin-top: 20px;
+  background: rgba(255,255,255,0.72);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255,255,255,0.3);
+  box-shadow: 0 8px 32px rgba(108,92,231,0.15);
+}
+.welcome-title {
+  font-size: 26px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #6C5CE7, #E84393);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 8px;
+}
+.welcome-subtitle {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 40px;
+  text-align: center;
+}
+.welcome-roles {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.role-card {
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.role-card:active { transform: scale(0.97); }
+.role-card .role-emoji { font-size: 36px; }
+.role-card .role-info h3 { font-size: 17px; font-weight: 700; color: #1a1a2e; margin-bottom: 3px; }
+.role-card .role-info p { font-size: 12px; color: #888; }
+.welcome-footer {
+  margin-top: auto;
+  font-size: 11px;
+  color: #bbb;
+  text-align: center;
+}
+
+/* ===== Screen 2: Home Parent ===== */
+.screen-home-parent {
+  background: linear-gradient(135deg, #E8F0FE 0%, #F3E7FF 50%, #FFE8EC 100%);
+}
+.home-header {
+  background: linear-gradient(135deg, #6C5CE7 0%, #A29BFE 40%, #FD79A8 100%);
+  padding: 48px 20px 24px;
+  border-radius: 0 0 24px 24px;
+}
+.home-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.home-greeting { color: rgba(255,255,255,0.85); font-size: 13px; }
+.home-greeting span { font-size: 22px; font-weight: 700; display: block; color: #fff; margin-top: 2px; }
+.home-avatar {
+  width: 42px; height: 42px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.25);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  border: 2px solid rgba(255,255,255,0.4);
+}
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.25);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255,255,255,0.3);
+}
+.search-bar input {
+  border: none;
+  background: none;
+  outline: none;
+  font-size: 14px;
+  color: #fff;
+  flex: 1;
+}
+.search-bar input::placeholder { color: rgba(255,255,255,0.6); }
+.search-icon { font-size: 18px; }
+
+.home-content {
+  padding: 16px 16px 90px;
+}
+.banner-card {
+  padding: 18px 20px;
+  margin-bottom: 16px;
+  background: linear-gradient(135deg, rgba(108,92,231,0.85), rgba(232,67,147,0.85));
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+}
+.banner-card::after {
+  content: '';
+  position: absolute;
+  right: -20px;
+  top: -20px;
+  width: 100px;
+  height: 100px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 50%;
+}
+.banner-card h3 { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+.banner-card p { font-size: 12px; opacity: 0.85; }
+.banner-tag {
+  display: inline-block;
+  background: rgba(255,255,255,0.25);
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  margin-top: 8px;
+}
+
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.category-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 4px;
+  cursor: pointer;
+}
+.category-item:active { transform: scale(0.95); }
+.category-item .cat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.8), rgba(255,255,255,0.6));
+  border: 1px solid rgba(255,255,255,0.4);
+}
+.category-item span { font-size: 11px; color: #555; font-weight: 500; }
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 18px 0 12px;
+}
+.section-header h3 { font-size: 16px; font-weight: 700; color: #1a1a2e; }
+.section-header .more { font-size: 12px; color: #999; cursor: pointer; }
+
+.teacher-card {
+  padding: 16px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  display: flex;
+  gap: 14px;
+  transition: all 0.2s;
+}
+.teacher-card:active { transform: scale(0.98); }
+.teacher-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  flex-shrink: 0;
+}
+.teacher-info { flex: 1; min-width: 0; }
+.teacher-info .name-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 2px;
+}
+.teacher-info .name { font-size: 15px; font-weight: 700; color: #1a1a2e; }
+.teacher-info .badge {
+  font-size: 10px;
+  padding: 1px 8px;
+  border-radius: 20px;
+  background: rgba(108,92,231,0.1);
+  color: #6C5CE7;
+  font-weight: 600;
+}
+.teacher-info .badge.purple {
+  background: rgba(156,106,222,0.15);
+  color: #9C6ADE;
+}
+.teacher-info .school { font-size: 12px; color: #888; margin-bottom: 4px; }
+.teacher-info .tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+.teacher-info .tag {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: rgba(108,92,231,0.06);
+  color: #6C5CE7;
+}
+.teacher-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+  color: #666;
+}
+.teacher-meta .rating { color: #F6BD16; font-weight: 700; }
+.teacher-price {
+  font-size: 16px;
+  font-weight: 800;
+  color: #E84393;
+  flex-shrink: 0;
+  align-self: center;
+}
+
+/* ===== Screen 3: List ===== */
+.screen-list {
+  background: linear-gradient(135deg, #E8F0FE 0%, #F3E7FF 50%, #FFE8EC 100%);
+}
+.filter-bar {
+  display: flex;
+  gap: 8px;
+  padding: 8px 16px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.filter-bar::-webkit-scrollbar { display: none; }
+.filter-btn {
+  flex-shrink: 0;
+  padding: 7px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid rgba(255,255,255,0.4);
+  background: rgba(255,255,255,0.6);
+  color: #666;
+}
+.filter-btn.active {
+  background: linear-gradient(135deg, #6C5CE7, #A29BFE);
+  color: #fff;
+  border-color: transparent;
+}
+.list-content { padding: 8px 16px 90px; }
+
+/* ===== Screen 4: Messages ===== */
+.screen-messages {
+  background: linear-gradient(135deg, #E8F0FE 0%, #F3E7FF 50%, #FFE8EC 100%);
+}
+.msg-list { padding: 8px 16px 90px; }
+.msg-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.msg-item:active { transform: scale(0.98); }
+.msg-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  color: #fff;
+  flex-shrink: 0;
+  position: relative;
+}
+.msg-avatar .unread-dot {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 10px;
+  height: 10px;
+  background: #FF4757;
+  border-radius: 50%;
+  border: 2px solid #fff;
+}
+.msg-info { flex: 1; min-width: 0; }
+.msg-info .msg-name { font-size: 15px; font-weight: 600; color: #1a1a2e; margin-bottom: 2px; }
+.msg-info .msg-preview { font-size: 13px; color: #888; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.msg-time { font-size: 11px; color: #bbb; flex-shrink: 0; }
+
+/* ===== Screen 5: Detail ===== */
+.screen-detail {
+  background: #f5f5fa;
+}
+.detail-hero {
+  background: linear-gradient(135deg, #6C5CE7 0%, #A29BFE 50%, #74B9FF 100%);
+  padding: 38px 20px 28px;
+  position: relative;
+}
+.detail-hero .nav-bar { position: relative; top: auto; background: none; backdrop-filter: none; padding-top: 0; }
+.detail-hero .nav-back { background: rgba(255,255,255,0.2); color: #fff; }
+.detail-hero .nav-title { color: #fff; }
+.detail-profile {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 4px;
+  margin-bottom: 16px;
+}
+.detail-avatar {
+  width: 68px;
+  height: 68px;
+  border-radius: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 34px;
+  background: rgba(255,255,255,0.2);
+  border: 2px solid rgba(255,255,255,0.4);
+}
+.detail-name { font-size: 22px; font-weight: 800; color: #fff; }
+.detail-school { font-size: 13px; color: rgba(255,255,255,0.8); margin-top: 2px; }
+.detail-stats {
+  display: flex;
+  gap: 0;
+  background: rgba(255,255,255,0.15);
+  border-radius: 14px;
+  padding: 12px 0;
+  backdrop-filter: blur(10px);
+}
+.detail-stat {
+  flex: 1;
+  text-align: center;
+}
+.detail-stat .stat-val { font-size: 18px; font-weight: 800; color: #fff; }
+.detail-stat .stat-label { font-size: 11px; color: rgba(255,255,255,0.7); margin-top: 1px; }
+.detail-stat + .detail-stat { border-left: 1px solid rgba(255,255,255,0.2); }
+
+.detail-body {
+  padding: 16px;
+  margin-top: -12px;
+  position: relative;
+  z-index: 2;
+}
+.detail-card {
+  padding: 18px;
+  margin-bottom: 12px;
+}
+.detail-card h4 {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin-bottom: 10px;
+}
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.info-item {
+  display: flex;
+  flex-direction: column;
+}
+.info-item .info-label { font-size: 11px; color: #999; }
+.info-item .info-value { font-size: 14px; font-weight: 600; color: #333; margin-top: 2px; }
+
+.photo-scroll {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+.photo-scroll::-webkit-scrollbar { display: none; }
+.photo-item {
+  width: 90px;
+  height: 110px;
+  border-radius: 12px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  color: rgba(255,255,255,0.9);
+}
+
+.classroom-banner {
+  background: linear-gradient(135deg, #6C5CE7, #E84393);
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  color: #fff;
+  margin-bottom: 12px;
+}
+.classroom-banner h4 { font-size: 16px; font-weight: 700; }
+.classroom-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+  justify-content: center;
+}
+.classroom-tags span {
+  padding: 4px 12px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 20px;
+  font-size: 12px;
+}
+
+.review-item {
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(0,0,0,0.04);
+}
+.review-item:last-child { border-bottom: none; }
+.review-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.review-avatar {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: #fff;
+}
+.review-name { font-size: 13px; font-weight: 600; color: #333; }
+.review-stars { font-size: 12px; color: #F6BD16; margin-left: auto; }
+.review-text { font-size: 13px; color: #555; line-height: 1.5; }
+.review-date { font-size: 11px; color: #bbb; margin-top: 4px; }
+
+.detail-bottom {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  gap: 10px;
+  padding: 12px 16px 20px;
+  background: rgba(255,255,255,0.82);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255,255,255,0.3);
+  z-index: 20;
+}
+.detail-btn {
+  flex: 1;
+  padding: 13px;
+  border-radius: 14px;
+  border: none;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+}
+.detail-btn.primary {
+  background: linear-gradient(135deg, #6C5CE7, #A29BFE);
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(108,92,231,0.3);
+}
+.detail-btn.secondary {
+  background: rgba(108,92,231,0.08);
+  color: #6C5CE7;
+}
+
+/* ===== Screen 6: AI Chat ===== */
+.screen-ai {
+  background: linear-gradient(135deg, #E8F0FE 0%, #F3E7FF 50%, #FFE8EC 100%);
+  display: flex;
+  flex-direction: column;
+}
+.ai-chat-body {
+  flex: 1;
+  padding: 8px 14px;
+  overflow-y: auto;
+  padding-bottom: 80px;
+}
+.chat-msg {
+  margin-bottom: 14px;
+  display: flex;
+  gap: 10px;
+}
+.chat-msg.user { flex-direction: row-reverse; }
+.chat-msg-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+.chat-msg-avatar.ai-avatar {
+  background: linear-gradient(135deg, #6C5CE7, #A29BFE);
+}
+.chat-msg-avatar.user-avatar {
+  background: linear-gradient(135deg, #5B8FF9, #74B9FF);
+}
+.chat-bubble {
+  max-width: 80%;
+  padding: 12px 16px;
+  border-radius: 18px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #333;
+}
+.chat-msg.assistant .chat-bubble {
+  background: rgba(255,255,255,0.82);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255,255,255,0.4);
+  border-top-left-radius: 4px;
+}
+.chat-msg.user .chat-bubble {
+  background: linear-gradient(135deg, #6C5CE7, #A29BFE);
+  color: #fff;
+  border-top-right-radius: 4px;
+}
+.chat-sender { font-size: 11px; color: #999; margin-bottom: 3px; font-weight: 600; }
+.ai-input-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px 20px;
+  background: rgba(255,255,255,0.82);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255,255,255,0.3);
+  z-index: 20;
+}
+.ai-input-bar input {
+  flex: 1;
+  padding: 10px 16px;
+  border-radius: 22px;
+  border: 1px solid rgba(108,92,231,0.2);
+  background: rgba(255,255,255,0.8);
+  font-size: 14px;
+  outline: none;
+  color: #333;
+}
+.ai-input-bar input::placeholder { color: #bbb; }
+.ai-send-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6C5CE7, #A29BFE);
+  border: none;
+  color: #fff;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.ai-send-btn:active { transform: scale(0.92); }
+
+/* ===== Screen 7: Mine Student ===== */
+.screen-mine-student {
+  background: linear-gradient(135deg, #E8F0FE 0%, #F3E7FF 50%, #FFE8EC 100%);
+}
+.mine-header {
+  background: linear-gradient(135deg, #6C5CE7 0%, #A29BFE 40%, #FD79A8 100%);
+  padding: 52px 20px 28px;
+  border-radius: 0 0 24px 24px;
+  text-align: center;
+}
+.mine-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  margin: 0 auto 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  background: rgba(255,255,255,0.25);
+  border: 3px solid rgba(255,255,255,0.4);
+}
+.mine-name { font-size: 20px; font-weight: 800; color: #fff; }
+.mine-school { font-size: 13px; color: rgba(255,255,255,0.8); margin-top: 2px; }
+
+.mine-content { padding: 16px; padding-bottom: 90px; }
+.income-card {
+  background: linear-gradient(135deg, #6C5CE7 0%, #A29BFE 50%, #E84393 100%);
+  border-radius: 20px;
+  padding: 22px;
+  color: #fff;
+  margin-bottom: 14px;
+  position: relative;
+  overflow: hidden;
+}
+.income-card::before {
+  content: '';
+  position: absolute;
+  right: -30px;
+  top: -30px;
+  width: 120px;
+  height: 120px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 50%;
+}
+.income-card::after {
+  content: '';
+  position: absolute;
+  left: -20px;
+  bottom: -20px;
+  width: 80px;
+  height: 80px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 50%;
+}
+.income-amount { font-size: 32px; font-weight: 800; margin-bottom: 4px; }
+.income-label { font-size: 12px; opacity: 0.8; }
+.income-details {
+  display: flex;
+  gap: 24px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255,255,255,0.2);
+}
+.income-detail-item .detail-val { font-size: 18px; font-weight: 700; }
+.income-detail-item .detail-label { font-size: 11px; opacity: 0.7; }
+
+.badge-card {
+  padding: 16px 20px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border: 2px solid rgba(246,189,22,0.3);
+}
+.badge-icon { font-size: 36px; }
+.badge-info h4 { font-size: 15px; font-weight: 700; color: #1a1a2e; }
+.badge-info p { font-size: 12px; color: #888; margin-top: 2px; }
+
+.ai-entry-card {
+  padding: 18px 20px;
+  margin-bottom: 10px;
+  background: linear-gradient(135deg, rgba(108,92,231,0.85), rgba(162,155,254,0.85));
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.ai-entry-card:active { transform: scale(0.98); }
+.ai-entry-icon { font-size: 36px; }
+.ai-entry-info h4 { font-size: 16px; font-weight: 700; }
+.ai-entry-info p { font-size: 12px; opacity: 0.8; margin-top: 2px; }
+
+.mine-section-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin: 18px 0 10px;
+}
+
+.order-tabs {
+  display: flex;
+  gap: 0;
+  padding: 4px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.5);
+  backdrop-filter: blur(16px);
+  margin-bottom: 12px;
+}
+.order-tab {
+  flex: 1;
+  text-align: center;
+  padding: 10px 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: #666;
+  border-radius: 12px;
+  cursor: pointer;
+  position: relative;
+}
+.order-tab.active {
+  background: rgba(255,255,255,0.9);
+  color: #6C5CE7;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+.order-tab .tab-badge {
+  position: absolute;
+  top: 6px;
+  right: calc(50% - 22px);
+  width: 8px;
+  height: 8px;
+  background: #FF4757;
+  border-radius: 50%;
+}
+
+.qual-list {
+  padding: 0;
+}
+.qual-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(0,0,0,0.03);
+}
+.qual-item:last-child { border-bottom: none; }
+.qual-name { font-size: 14px; color: #333; }
+.qual-status { font-size: 12px; font-weight: 600; }
+.qual-status.passed { color: #2ED573; }
+.qual-status.pending { color: #FFA502; }
+
+.setting-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  margin-top: 10px;
+  cursor: pointer;
+}
+.setting-btn:active { transform: scale(0.98); }
+
+/* ===== Screen 8: Settings ===== */
+.screen-settings {
+  background: #f5f5fa;
+}
+.settings-content { padding: 8px 16px 30px; }
+.settings-group {
+  margin-bottom: 16px;
+  border-radius: 16px;
+  overflow: hidden;
+  background: rgba(255,255,255,0.82);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255,255,255,0.4);
+}
+.settings-group-title {
+  font-size: 12px;
+  color: #999;
+  font-weight: 500;
+  padding: 12px 16px 6px;
+}
+.settings-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(0,0,0,0.03);
+  cursor: pointer;
+}
+.settings-item:last-child { border-bottom: none; }
+.settings-item .item-left { display: flex; align-items: center; gap: 10px; }
+.settings-item .item-icon { font-size: 18px; }
+.settings-item .item-label { font-size: 14px; color: #333; }
+.settings-item .item-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #999;
+  font-size: 13px;
+}
+.toggle-switch {
+  width: 44px;
+  height: 26px;
+  border-radius: 13px;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+.toggle-switch.on { background: #2ED573; }
+.toggle-switch.off { background: #ccc; }
+.toggle-switch::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+  transition: left 0.3s;
+}
+.toggle-switch.on::after { left: 20px; }
+.toggle-switch.off::after { left: 2px; }
+
+/* ===== Screen 9: Mine Parent ===== */
+.screen-mine-parent {
+  background: linear-gradient(135deg, #E8F0FE 0%, #F3E7FF 50%, #FFE8EC 100%);
+}
+.parent-mine-content { padding: 16px; padding-bottom: 90px; }
+.child-card {
+  padding: 14px 16px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.child-avatar {
+  width: 42px; height: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+.child-name { font-size: 14px; font-weight: 600; color: #333; }
+.child-grade { font-size: 12px; color: #888; }
+.add-child {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px;
+  border: 2px dashed rgba(108,92,231,0.3);
+  border-radius: 12px;
+  color: #6C5CE7;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  margin-bottom: 12px;
+}
+
+/* ===== Animation helpers ===== */
+.fade-in {
+  animation: fadeInUp 0.35s ease forwards;
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+</style>
+</head>
+<body>
+
+<div class="phone-container">
+  <div class="phone-title-bar" id="pageTitle">身份选择</div>
+  <div class="phone-frame">
+    <div class="phone-notch"></div>
+
+    <!-- ==================== SCREEN 1: Welcome ==================== -->
+    <div class="screen active" id="screen-welcome">
+      <div class="screen-welcome">
+        <div class="welcome-logo">📚</div>
+        <div class="welcome-title">校园家教助手</div>
+        <div class="welcome-subtitle">连接校园优质师资，让学习更高效</div>
+        <div class="welcome-roles">
+          <div class="role-card glass" onclick="navigateTo('screen-home-parent')">
+            <span class="role-emoji">👨‍👩‍👧</span>
+            <div class="role-info">
+              <h3>我是家长</h3>
+              <p>为孩子找到最合适的家教老师</p>
+            </div>
+          </div>
+          <div class="role-card glass" onclick="navigateTo('screen-mine-student')">
+            <span class="role-emoji">🎓</span>
+            <div class="role-info">
+              <h3>我是学生</h3>
+              <p>利用课余时间赚取收入，教学相长</p>
+            </div>
+          </div>
+          <div class="role-card glass" onclick="navigateTo('screen-home-parent')">
+            <span class="role-emoji">🏫</span>
+            <div class="role-info">
+              <h3>我是教师</h3>
+              <p>退休教师也可入驻，传递教学经验</p>
+            </div>
+          </div>
+        </div>
+        <div class="welcome-footer">登录即代表同意《用户协议》和《隐私政策》</div>
+      </div>
+    </div>
+
+    <!-- ==================== SCREEN 2: Home Parent ==================== -->
+    <div class="screen" id="screen-home-parent">
+      <div class="screen-home-parent">
+        <div class="home-header">
+          <div class="home-header-top">
+            <div class="home-greeting">下午好，柴女士 👋<span>为孩子找一位好老师</span></div>
+            <div class="home-avatar" onclick="navigateTo('screen-mine-parent')">👩</div>
+          </div>
+          <div class="search-bar" onclick="navigateTo('screen-list')">
+            <span class="search-icon">🔍</span>
+            <input type="text" placeholder="搜索老师、科目..." readonly>
+          </div>
+        </div>
+        <div class="home-content">
+          <div class="banner-card glass" style="background: linear-gradient(135deg, rgba(108,92,231,0.85), rgba(232,67,147,0.85));">
+            <h3>🔥 新用户专享</h3>
+            <p>前三节课双倍课时费，快来体验</p>
+            <div class="banner-tag">立即领取 →</div>
+          </div>
+
+          <div class="category-grid">
+            <div class="category-item glass-subtle" onclick="navigateTo('screen-list')">
+              <div class="cat-icon">📖</div>
+              <span>小学辅导</span>
+            </div>
+            <div class="category-item glass-subtle" onclick="navigateTo('screen-list')">
+              <div class="cat-icon">📝</div>
+              <span>初中全科</span>
+            </div>
+            <div class="category-item glass-subtle" onclick="navigateTo('screen-list')">
+              <div class="cat-icon">🎯</div>
+              <span>高中冲刺</span>
+            </div>
+            <div class="category-item glass-subtle" onclick="navigateTo('screen-list')">
+              <div class="cat-icon">⭐</div>
+              <span>金牌讲师</span>
+            </div>
+          </div>
+
+          <div class="section-header">
+            <h3>推荐老师</h3>
+            <span class="more" onclick="navigateTo('screen-list')">查看全部 ›</span>
+          </div>
+
+          <div class="teacher-card glass" onclick="navigateTo('screen-detail')">
+            <div class="teacher-avatar" style="background: linear-gradient(135deg, #74B9FF, #A29BFE);">👩‍🎓</div>
+            <div class="teacher-info">
+              <div class="name-row">
+                <span class="name">李同学</span>
+                <span class="badge">河北大学</span>
+              </div>
+              <div class="school">大三 · 英语专业</div>
+              <div class="tags"><span class="tag">小学全科</span></div>
+              <div class="teacher-meta">
+                <span class="rating">⭐ 4.9</span>
+                <span>1.2km</span>
+                <span>23人已辅导</span>
+              </div>
+            </div>
+            <div class="teacher-price">¥45/时</div>
+          </div>
+
+          <div class="teacher-card glass" onclick="navigateTo('screen-detail')">
+            <div class="teacher-avatar" style="background: linear-gradient(135deg, #55EFC4, #00B894);">👨‍🎓</div>
+            <div class="teacher-info">
+              <div class="name-row">
+                <span class="name">张同学</span>
+                <span class="badge">保定学院</span>
+              </div>
+              <div class="school">大四 · 数学专业</div>
+              <div class="tags"><span class="tag">初中数学</span><span class="tag">英语</span></div>
+              <div class="teacher-meta">
+                <span class="rating">⭐ 4.8</span>
+                <span>0.8km</span>
+                <span>15人已辅导</span>
+              </div>
+            </div>
+            <div class="teacher-price">¥65/时</div>
+          </div>
+
+          <div class="teacher-card glass" onclick="navigateTo('screen-detail')">
+            <div class="teacher-avatar" style="background: linear-gradient(135deg, #DDA0DD, #9C6ADE);">👩‍🏫</div>
+            <div class="teacher-info">
+              <div class="name-row">
+                <span class="name">王老师</span>
+                <span class="badge purple">退休教师</span>
+              </div>
+              <div class="school">30年教龄 · 高级教师</div>
+              <div class="tags"><span class="tag">高中数学</span></div>
+              <div class="teacher-meta">
+                <span class="rating">⭐ 5.0</span>
+                <span>2.5km</span>
+                <span>31人已辅导</span>
+              </div>
+            </div>
+            <div class="teacher-price">¥120/时</div>
+          </div>
+        </div>
+
+        <div class="tab-bar">
+          <div class="tab-item active" onclick="switchTab('screen-home-parent')">
+            <span class="tab-icon">🏠</span>
+            <span class="tab-label">首页</span>
+          </div>
+          <div class="tab-item" onclick="switchTab('screen-list')">
+            <span class="tab-icon">🔍</span>
+            <span class="tab-label">找老师</span>
+          </div>
+          <div class="tab-item" onclick="switchTab('screen-messages')">
+            <span class="tab-icon">💬</span>
+            <span class="tab-label">消息</span>
+          </div>
+          <div class="tab-item" onclick="switchTab('screen-mine-parent')">
+            <span class="tab-icon">👤</span>
+            <span class="tab-label">我的</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== SCREEN 3: Find Teacher List ==================== -->
+    <div class="screen" id="screen-list">
+      <div class="screen-list">
+        <div class="nav-bar">
+          <button class="nav-back" onclick="goBack('screen-home-parent')">‹</button>
+          <div class="nav-title">找老师</div>
+        </div>
+        <div class="filter-bar">
+          <div class="filter-btn active" onclick="setFilter(this)">全部</div>
+          <div class="filter-btn" onclick="setFilter(this)">小学</div>
+          <div class="filter-btn" onclick="setFilter(this)">初中</div>
+          <div class="filter-btn" onclick="setFilter(this)">高中</div>
+          <div class="filter-btn" onclick="setFilter(this)">距离最近</div>
+          <div class="filter-btn" onclick="setFilter(this)">评分最高</div>
+        </div>
+        <div class="list-content">
+          <div class="teacher-card glass" onclick="navigateTo('screen-detail')">
+            <div class="teacher-avatar" style="background: linear-gradient(135deg, #74B9FF, #A29BFE);">👩‍🎓</div>
+            <div class="teacher-info">
+              <div class="name-row">
+                <span class="name">李同学</span>
+                <span class="badge">河北大学985</span>
+              </div>
+              <div class="school">大三 · 英语专业</div>
+              <div class="tags"><span class="tag">小学全科</span></div>
+              <div class="teacher-meta">
+                <span class="rating">⭐ 4.9</span>
+                <span>1.2km</span>
+                <span>23人</span>
+              </div>
+            </div>
+            <div class="teacher-price">¥45/时</div>
+          </div>
+          <div class="teacher-card glass" onclick="navigateTo('screen-detail')">
+            <div class="teacher-avatar" style="background: linear-gradient(135deg, #55EFC4, #00B894);">👨‍🎓</div>
+            <div class="teacher-info">
+              <div class="name-row">
+                <span class="name">张同学</span>
+                <span class="badge">保定学院</span>
+              </div>
+              <div class="school">大四 · 数学专业</div>
+              <div class="tags"><span class="tag">初中数学</span><span class="tag">英语</span></div>
+              <div class="teacher-meta">
+                <span class="rating">⭐ 4.8</span>
+                <span>0.8km</span>
+                <span>15人</span>
+              </div>
+            </div>
+            <div class="teacher-price">¥65/时</div>
+          </div>
+          <div class="teacher-card glass" onclick="navigateTo('screen-detail')">
+            <div class="teacher-avatar" style="background: linear-gradient(135deg, #FFEAA7, #FDCB6E);">👨‍🎓</div>
+            <div class="teacher-info">
+              <div class="name-row">
+                <span class="name">陈同学</span>
+                <span class="badge">保定学院</span>
+              </div>
+              <div class="school">大三 · 汉语言文学</div>
+              <div class="tags"><span class="tag">小学语文</span><span class="tag">数学</span></div>
+              <div class="teacher-meta">
+                <span class="rating">⭐ 4.7</span>
+                <span>2.1km</span>
+                <span>8人</span>
+              </div>
+            </div>
+            <div class="teacher-price">¥40/时</div>
+          </div>
+          <div class="teacher-card glass" onclick="navigateTo('screen-detail')">
+            <div class="teacher-avatar" style="background: linear-gradient(135deg, #DDA0DD, #9C6ADE);">👩‍🏫</div>
+            <div class="teacher-info">
+              <div class="name-row">
+                <span class="name">王老师</span>
+                <span class="badge purple">退休教师</span>
+              </div>
+              <div class="school">30年教龄 · 高级教师</div>
+              <div class="tags"><span class="tag">高中数学</span><span class="tag">物理</span></div>
+              <div class="teacher-meta">
+                <span class="rating">⭐ 5.0</span>
+                <span>2.5km</span>
+                <span>31人</span>
+              </div>
+            </div>
+            <div class="teacher-price">¥120/时</div>
+          </div>
+        </div>
+        <div class="tab-bar">
+          <div class="tab-item" onclick="switchTab('screen-home-parent')">
+            <span class="tab-icon">🏠</span>
+            <span class="tab-label">首页</span>
+          </div>
+          <div class="tab-item active" onclick="switchTab('screen-list')">
+            <span class="tab-icon">🔍</span>
+            <span class="tab-label">找老师</span>
+          </div>
+          <div class="tab-item" onclick="switchTab('screen-messages')">
+            <span class="tab-icon">💬</span>
+            <span class="tab-label">消息</span>
+          </div>
+          <div class="tab-item" onclick="switchTab('screen-mine-parent')">
+            <span class="tab-icon">👤</span>
+            <span class="tab-label">我的</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== SCREEN 4: Messages ==================== -->
+    <div class="screen" id="screen-messages">
+      <div class="screen-messages">
+        <div class="nav-bar">
+          <button class="nav-back" onclick="goBack('screen-home-parent')">‹</button>
+          <div class="nav-title">消息</div>
+        </div>
+        <div class="msg-list">
+          <div class="msg-item glass">
+            <div class="msg-avatar" style="background: linear-gradient(135deg, #6C5CE7, #A29BFE);">🤖</div>
+            <div class="msg-info">
+              <div class="msg-name">系统通知</div>
+              <div class="msg-preview">欢迎使用校园家教助手，开启高效学习之旅</div>
+            </div>
+            <div class="msg-time">今天</div>
+          </div>
+          <div class="msg-item glass">
+            <div class="msg-avatar" style="background: #5B8FF9;">
+              李
+              <span class="unread-dot"></span>
+            </div>
+            <div class="msg-info">
+              <div class="msg-name">李同学</div>
+              <div class="msg-preview">好的，我周六下午可以去试课</div>
+            </div>
+            <div class="msg-time">2分钟前</div>
+          </div>
+          <div class="msg-item glass">
+            <div class="msg-avatar" style="background: #5AD8A6;">张</div>
+            <div class="msg-info">
+              <div class="msg-name">张同学</div>
+              <div class="msg-preview">孩子今天进步很大！</div>
+            </div>
+            <div class="msg-time">昨天</div>
+          </div>
+          <div class="msg-item glass">
+            <div class="msg-avatar" style="background: #F6BD16;">陈</div>
+            <div class="msg-info">
+              <div class="msg-name">陈同学</div>
+              <div class="msg-preview">老师好，我想问一下作业</div>
+            </div>
+            <div class="msg-time">3天前</div>
+          </div>
+        </div>
+        <div class="tab-bar">
+          <div class="tab-item" onclick="switchTab('screen-home-parent')">
+            <span class="tab-icon">🏠</span>
+            <span class="tab-label">首页</span>
+          </div>
+          <div class="tab-item" onclick="switchTab('screen-list')">
+            <span class="tab-icon">🔍</span>
+            <span class="tab-label">找老师</span>
+          </div>
+          <div class="tab-item active" onclick="switchTab('screen-messages')">
+            <span class="tab-icon">💬</span>
+            <span class="tab-label">消息</span>
+          </div>
+          <div class="tab-item" onclick="switchTab('screen-mine-parent')">
+            <span class="tab-icon">👤</span>
+            <span class="tab-label">我的</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== SCREEN 5: Teacher Detail ==================== -->
+    <div class="screen" id="screen-detail">
+      <div class="screen-detail">
+        <div class="detail-hero">
+          <div class="nav-bar">
+            <button class="nav-back" onclick="goBack('screen-home-parent')">‹</button>
+            <div class="nav-title">教师详情</div>
+          </div>
+          <div class="detail-profile">
+            <div class="detail-avatar">👩‍🎓</div>
+            <div>
+              <div class="detail-name">李同学</div>
+              <div class="detail-school">河北大学 · 大三 · 英语专业</div>
+            </div>
+          </div>
+          <div class="detail-stats">
+            <div class="detail-stat">
+              <div class="stat-val">4.9</div>
+              <div class="stat-label">评分</div>
+            </div>
+            <div class="detail-stat">
+              <div class="stat-val">23</div>
+              <div class="stat-label">已辅导</div>
+            </div>
+            <div class="detail-stat">
+              <div class="stat-val">98%</div>
+              <div class="stat-label">好评率</div>
+            </div>
+          </div>
+        </div>
+        <div class="detail-body">
+          <div class="detail-card glass-strong">
+            <h4>基本信息</h4>
+            <div class="info-grid">
+              <div class="info-item">
+                <span class="info-label">教学阶段</span>
+                <span class="info-value">小学全科</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">课时价格</span>
+                <span class="info-value" style="color:#E84393;">¥45/时</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">可用时间</span>
+                <span class="info-value">周末、工作日晚</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">考核等级</span>
+                <span class="info-value" style="color:#2ED573;">优秀</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="detail-card glass-strong">
+            <h4>我的生活照</h4>
+            <div class="photo-scroll">
+              <div class="photo-item" style="background: linear-gradient(135deg, #74B9FF, #A29BFE);">📸</div>
+              <div class="photo-item" style="background: linear-gradient(135deg, #FF7675, #FD79A8);">📸</div>
+              <div class="photo-item" style="background: linear-gradient(135deg, #55EFC4, #00B894);">📸</div>
+              <div class="photo-item" style="background: rgba(108,92,231,0.1); color: #6C5CE7; font-size: 22px;">+</div>
+            </div>
+          </div>
+
+          <div class="detail-card glass-strong" style="padding: 0; overflow: hidden;">
+            <div class="classroom-banner">
+              <h4>✨ 欢迎来到李同学的小教室</h4>
+              <div class="classroom-tags">
+                <span>耐心细致</span>
+                <span>寓教于乐</span>
+                <span>提分专家</span>
+                <span>耐心细致</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="detail-card glass-strong">
+            <h4>教学特色</h4>
+            <p style="font-size: 13px; color: #555; line-height: 1.7;">
+              擅长小学全科辅导，特别是英语口语和数学思维训练。教学风格活泼有趣，善于用游戏化的方式激发孩子的学习兴趣。英语四六级已过，有家教经验3年，累计辅导学生23人，提分效果显著。课后会及时与家长沟通孩子的学习情况。
+            </p>
+          </div>
+
+          <div class="detail-card glass-strong">
+            <h4>家长评价</h4>
+            <div class="review-item">
+              <div class="review-header">
+                <div class="review-avatar" style="background: #5B8FF9;">王</div>
+                <span class="review-name">王女士</span>
+                <span class="review-stars">⭐⭐⭐⭐⭐</span>
+              </div>
+              <div class="review-text">李同学非常有耐心，孩子很喜欢她的课。英语成绩从70分提到了92分，非常感谢！</div>
+              <div class="review-date">2024-12-15</div>
+            </div>
+            <div class="review-item">
+              <div class="review-header">
+                <div class="review-avatar" style="background: #FF7675;">赵</div>
+                <span class="review-name">赵先生</span>
+                <span class="review-stars">⭐⭐⭐⭐⭐</span>
+              </div>
+              <div class="review-text">教学方法很好，孩子从不喜欢写作业变得主动学习了，强烈推荐！</div>
+              <div class="review-date">2024-11-28</div>
+            </div>
+          </div>
+          <div style="height: 70px;"></div>
+        </div>
+        <div class="detail-bottom">
+          <button class="detail-btn secondary">💬 咨询</button>
+          <button class="detail-btn primary">📞 预约试课</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== SCREEN 6: AI Chat ==================== -->
+    <div class="screen" id="screen-ai">
+      <div class="screen-ai">
+        <div class="nav-bar">
+          <button class="nav-back" onclick="goBack('screen-mine-student')">‹</button>
+          <div class="nav-title">AI教学小助手</div>
+        </div>
+        <div class="ai-chat-body" id="aiChatBody">
+          <div class="chat-msg assistant">
+            <div class="chat-msg-avatar ai-avatar">🤖</div>
+            <div>
+              <div class="chat-sender">AI助手</div>
+              <div class="chat-bubble">
+                你好！我是你的AI教学小助手 ✨<br><br>
+                我可以帮你：<br>
+                📋 智能备课<br>
+                📝 出题组卷<br>
+                📊 学情分析<br>
+                💡 教学方法<br><br>
+                有什么需要帮助的吗？
+              </div>
+            </div>
+          </div>
+          <div class="chat-msg user">
+            <div class="chat-msg-avatar user-avatar">🧑‍🎓</div>
+            <div>
+              <div class="chat-bubble">帮我准备一份五年级数学分数加减法的教案</div>
+            </div>
+          </div>
+          <div class="chat-msg assistant">
+            <div class="chat-msg-avatar ai-avatar">🤖</div>
+            <div>
+              <div class="chat-sender">AI助手</div>
+              <div class="chat-bubble">
+                📋 <strong>五年级数学·分数加减法教案</strong><br><br>
+                <strong>一、教学目标</strong><br>
+                1. 理解同分母分数加减法的算理<br>
+                2. 掌握异分母分数加减法的通分方法<br>
+                3. 能正确计算并约分<br><br>
+                <strong>二、教学重点</strong><br>
+                异分母分数加减法的计算方法<br><br>
+                <strong>三、教学过程</strong><br>
+                1. 情境导入（5分钟）<br>
+                2. 探究新知（15分钟）<br>
+                3. 巩固练习（15分钟）<br>
+                4. 课堂小结（5分钟）<br><br>
+                <strong>四、作业布置</strong><br>
+                课本第78页 练习一 1-5题
+              </div>
+            </div>
+          </div>
+          <div class="chat-msg user">
+            <div class="chat-msg-avatar user-avatar">🧑‍🎓</div>
+            <div>
+              <div class="chat-bubble">好的，帮我出5道练习题</div>
+            </div>
+          </div>
+          <div class="chat-msg assistant">
+            <div class="chat-msg-avatar ai-avatar">🤖</div>
+            <div>
+              <div class="chat-sender">AI助手</div>
+              <div class="chat-bubble">
+                📝 <strong>分数加减法练习题</strong><br><br>
+                1️⃣ 3/7 + 2/7 = ?<br><br>
+                2️⃣ 5/8 - 1/8 = ?<br><br>
+                3️⃣ 1/3 + 1/6 = ?<br><br>
+                4️⃣ 2/5 + 1/3 = ?<br><br>
+                5️⃣ 7/12 - 1/4 = ?<br><br>
+                💡 提示：第3-5题需要先通分哦！<br>
+                需要答案和解析吗？
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="ai-input-bar">
+          <input type="text" id="aiInput" placeholder="输入你的问题..." onkeypress="if(event.key==='Enter')sendAIMessage()">
+          <button class="ai-send-btn" onclick="sendAIMessage()">↑</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== SCREEN 7: Mine - Student ==================== -->
+    <div class="screen" id="screen-mine-student">
+      <div class="screen-mine-student">
+        <div class="mine-header">
+          <div class="mine-avatar">🎓</div>
+          <div class="mine-name">柴同学</div>
+          <div class="mine-school">保定学院 · 物联网工程</div>
+        </div>
+        <div class="mine-content">
+          <div class="income-card">
+            <div class="income-amount">¥1,680</div>
+            <div class="income-label">本月收入</div>
+            <div class="income-details">
+              <div class="income-detail-item">
+                <div class="detail-val">12节</div>
+                <div class="detail-label">已完成课程</div>
+              </div>
+              <div class="income-detail-item">
+                <div class="detail-val">¥240</div>
+                <div class="detail-label">待结算</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="badge-card glass-strong">
+            <span class="badge-icon">🏅</span>
+            <div class="badge-info">
+              <h4>金牌讲师</h4>
+              <p>连续3个月好评率95%以上</p>
+            </div>
+          </div>
+
+          <div class="ai-entry-card" onclick="navigateTo('screen-ai')">
+            <span class="ai-entry-icon">🤖</span>
+            <div class="ai-entry-info">
+              <h4>AI教学助手</h4>
+              <p>备课、出题、学情分析一站搞定</p>
+            </div>
+          </div>
+
+          <div class="mine-section-title">我的接单</div>
+          <div class="order-tabs">
+            <div class="order-tab active">进行中<span class="tab-badge"></span></div>
+            <div class="order-tab">待确认<span class="tab-badge"></span></div>
+            <div class="order-tab">已完成</div>
+          </div>
+
+          <div class="mine-section-title">我的资质</div>
+          <div class="qual-list glass-strong" style="border-radius: 16px; overflow: hidden;">
+            <div class="qual-item">
+              <span class="qual-name">实名认证</span>
+              <span class="qual-status passed">✅ 优秀</span>
+            </div>
+            <div class="qual-item">
+              <span class="qual-name">小学辅导考核</span>
+              <span class="qual-status passed">✅ 优秀</span>
+            </div>
+            <div class="qual-item">
+              <span class="qual-name">初中辅导考核</span>
+              <span class="qual-status pending">待考试</span>
+            </div>
+          </div>
+
+          <div class="mine-section-title">收入明细</div>
+          <div class="glass-strong" style="border-radius: 16px; padding: 14px 16px; margin-bottom: 8px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <div style="font-size:14px; font-weight:600; color:#333;">课程收入</div>
+                <div style="font-size:12px; color:#999; margin-top:2px;">2024-12-15 · 小学英语</div>
+              </div>
+              <div style="font-size:16px; font-weight:700; color:#2ED573;">+¥45</div>
+            </div>
+          </div>
+          <div class="glass-strong" style="border-radius: 16px; padding: 14px 16px; margin-bottom: 8px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <div style="font-size:14px; font-weight:600; color:#333;">课程收入</div>
+                <div style="font-size:12px; color:#999; margin-top:2px;">2024-12-12 · 小学数学</div>
+              </div>
+              <div style="font-size:16px; font-weight:700; color:#2ED573;">+¥45</div>
+            </div>
+          </div>
+
+          <div class="setting-btn glass" onclick="navigateTo('screen-settings')">
+            <span style="font-size:14px; color:#333;">⚙️ 设置</span>
+            <span style="color:#ccc;">›</span>
+          </div>
+        </div>
+        <div class="tab-bar">
+          <div class="tab-item" onclick="switchTab('screen-home-parent')">
+            <span class="tab-icon">🏠</span>
+            <span class="tab-label">首页</span>
+          </div>
+          <div class="tab-item" onclick="switchTab('screen-list')">
+            <span class="tab-icon">🔍</span>
+            <span class="tab-label">找老师</span>
+          </div>
+          <div class="tab-item" onclick="switchTab('screen-messages')">
+            <span class="tab-icon">💬</span>
+            <span class="tab-label">消息</span>
+          </div>
+          <div class="tab-item active" onclick="switchTab('screen-mine-student')">
+            <span class="tab-icon">👤</span>
+            <span class="tab-label">我的</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== SCREEN 8: Settings ==================== -->
+    <div class="screen" id="screen-settings">
+      <div class="screen-settings">
+        <div class="nav-bar">
+          <button class="nav-back" onclick="goBack('screen-mine-student')">‹</button>
+          <div class="nav-title">设置</div>
+        </div>
+        <div class="settings-content">
+          <div class="settings-group-title">账号</div>
+          <div class="settings-group">
+            <div class="settings-item">
+              <div class="item-left">
+                <span class="item-icon">👤</span>
+                <span class="item-label">个人信息</span>
+              </div>
+              <div class="item-right"><span>›</span></div>
+            </div>
+            <div class="settings-item">
+              <div class="item-left">
+                <span class="item-icon">🪪</span>
+                <span class="item-label">实名认证</span>
+              </div>
+              <div class="item-right"><span style="color:#2ED573;">已通过 ✅</span><span>›</span></div>
+            </div>
+            <div class="settings-item">
+              <div class="item-left">
+                <span class="item-icon">🎓</span>
+                <span class="item-label">学生证认证</span>
+              </div>
+              <div class="item-right"><span style="color:#2ED573;">已通过 ✅</span><span>›</span></div>
+            </div>
+          </div>
+
+          <div class="settings-group-title">教室设置</div>
+          <div class="settings-group">
+            <div class="settings-item">
+              <div class="item-left">
+                <span class="item-icon">🏫</span>
+                <span class="item-label">我的教室</span>
+              </div>
+              <div class="item-right"><span style="color:#999;">编辑封面和标签</span><span>›</span></div>
+            </div>
+            <div class="settings-item">
+              <div class="item-left">
+                <span class="item-icon">📷</span>
+                <span class="item-label">生活照管理</span>
+              </div>
+              <div class="item-right"><span style="color:#999;">已上传3张</span><span>›</span></div>
+            </div>
+            <div class="settings-item">
+              <div class="item-left">
+                <span class="item-icon">💰</span>
+                <span class="item-label">课时价格设置</span>
+              </div>
+              <div class="item-right"><span style="color:#E84393; font-weight:600;">¥45/时</span><span>›</span></div>
+            </div>
+          </div>
+
+          <div class="settings-group-title">通知</div>
+          <div class="settings-group">
+            <div class="settings-item">
+              <div class="item-left">
+                <span class="item-icon">🔔</span>
+                <span class="item-label">新订单提醒</span>
+              </div>
+              <div class="item-right">
+                <div class="toggle-switch on" onclick="toggleSwitch(this)"></div>
+              </div>
+            </div>
+            <div class="settings-item">
+              <div class="item-left">
+                <span class="item-icon">💬</span>
+                <span class="item-label">消息通知</span>
+              </div>
+              <div class="item-right">
+                <div class="toggle-switch on" onclick="toggleSwitch(this)"></div>
+              </div>
+            </div>
+            <div class="settings-item">
+              <div class="item-left">
+                <span class="item-icon">💳</span>
+                <span class="item-label">收入到账提醒</span>
+              </div>
+              <div class="item-right">
+                <div class="toggle-switch on" onclick="toggleSwitch(this)"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-group-title">其他</div>
+          <div class="settings-group">
+            <div class="settings-item">
+              <div class="item-left">
+                <span class="item-icon">📞</span>
+                <span class="item-label">联系客服</span>
+              </div>
+              <div class="item-right"><span>›</span></div>
+            </div>
+            <div class="settings-item">
+              <div class="item-left">
+                <span class="item-icon">⭐</span>
+                <span class="item-label">给个好评</span>
+              </div>
+              <div class="item-right"><span>›</span></div>
+            </div>
+            <div class="settings-item">
+              <div class="item-left">
+                <span class="item-icon">ℹ️</span>
+                <span class="item-label">关于平台</span>
+              </div>
+              <div class="item-right"><span style="color:#ccc;">v1.0</span><span>›</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== SCREEN 9: Mine - Parent ==================== -->
+    <div class="screen" id="screen-mine-parent">
+      <div class="screen-mine-parent">
+        <div class="nav-bar">
+          <button class="nav-back" onclick="goBack('screen-home-parent')">‹</button>
+          <div class="nav-title">我的</div>
+        </div>
+        <div class="mine-header" style="padding-top: 10px;">
+          <div class="mine-avatar">👩</div>
+          <div class="mine-name">柴女士</div>
+          <div class="mine-school">家长 · 保定市</div>
+        </div>
+        <div class="parent-mine-content">
+          <div class="mine-section-title">孩子信息</div>
+          <div class="child-card glass-strong">
+            <div class="child-avatar" style="background: linear-gradient(135deg, #74B9FF, #A29BFE);">👦</div>
+            <div>
+              <div class="child-name">小明</div>
+              <div class="child-grade">五年级</div>
+            </div>
+          </div>
+          <div class="add-child glass">
+            <span>＋</span>
+            <span>添加孩子信息</span>
+          </div>
+
+          <div class="mine-section-title">我的订单</div>
+          <div class="order-tabs">
+            <div class="order-tab active">进行中<span class="tab-badge"></span></div>
+            <div class="order-tab">待确认<span class="tab-badge"></span></div>
+            <div class="order-tab">已完成</div>
+          </div>
+
+          <div class="mine-section-title">服务</div>
+          <div class="glass-strong" style="border-radius: 16px; overflow: hidden;">
+            <div class="settings-item">
+              <div class="item-left">
+                <span class="item-icon">📝</span>
+                <span class="item-label">我的评价</span>
+              </div>
+              <div class="item-right"><span>›</span></div>
+            </div>
+            <div class="settings-item">
+              <div class="item-left">
+                <span class="item-icon">🔄</span>
+                <span class="item-label">申请换老师</span>
+              </div>
+              <div class="item-right"><span>›</span></div>
+            </div>
+            <div class="settings-item">
+              <div class="item-left">
+                <span class="item-icon">📞</span>
+                <span class="item-label">联系客服</span>
+              </div>
+              <div class="item-right"><span>›</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="tab-bar">
+          <div class="tab-item" onclick="switchTab('screen-home-parent')">
+            <span class="tab-icon">🏠</span>
+            <span class="tab-label">首页</span>
+          </div>
+          <div class="tab-item" onclick="switchTab('screen-list')">
+            <span class="tab-icon">🔍</span>
+            <span class="tab-label">找老师</span>
+          </div>
+          <div class="tab-item" onclick="switchTab('screen-messages')">
+            <span class="tab-icon">💬</span>
+            <span class="tab-label">消息</span>
+          </div>
+          <div class="tab-item active" onclick="switchTab('screen-mine-parent')">
+            <span class="tab-icon">👤</span>
+            <span class="tab-label">我的</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /phone-frame -->
+</div><!-- /phone-container -->
+
+<script>
+// ===== Page Navigation =====
+const pageTitles = {
+  'screen-welcome': '身份选择',
+  'screen-home-parent': '首页',
+  'screen-list': '找老师',
+  'screen-messages': '消息',
+  'screen-detail': '教师详情',
+  'screen-ai': 'AI教学助手',
+  'screen-mine-student': '我的',
+  'screen-settings': '设置',
+  'screen-mine-parent': '我的'
+};
+
+const tabScreens = ['screen-home-parent', 'screen-list', 'screen-messages', 'screen-mine-parent', 'screen-mine-student'];
+let history = ['screen-welcome'];
+
+function navigateTo(screenId) {
+  const allScreens = document.querySelectorAll('.screen');
+  const currentScreen = document.querySelector('.screen.active');
+  const targetScreen = document.getElementById(screenId);
+
+  if (currentScreen) {
+    currentScreen.classList.remove('active');
+  }
+
+  history.push(screenId);
+
+  setTimeout(() => {
+    if (targetScreen) {
+      targetScreen.classList.add('active');
+      targetScreen.scrollTop = 0;
+    }
+    document.getElementById('pageTitle').textContent = pageTitles[screenId] || '';
+    updateTabBarState(screenId);
+  }, 50);
+}
+
+function goBack(screenId) {
+  const currentScreen = document.querySelector('.screen.active');
+  const targetScreen = document.getElementById(screenId);
+
+  if (history.length > 1) {
+    history.pop();
+  }
+
+  if (currentScreen) {
+    currentScreen.classList.remove('active');
+  }
+
+  setTimeout(() => {
+    if (targetScreen) {
+      targetScreen.classList.add('active');
+      targetScreen.scrollTop = 0;
+    }
+    document.getElementById('pageTitle').textContent = pageTitles[screenId] || '';
+    updateTabBarState(screenId);
+  }, 50);
+}
+
+function switchTab(screenId) {
+  const currentScreen = document.querySelector('.screen.active');
+  if (currentScreen) {
+    currentScreen.classList.remove('active');
+  }
+
+  // Keep history reasonable for back navigation
+  if (history.length > 0) {
+    history[history.length - 1] = screenId;
+  } else {
+    history.push(screenId);
+  }
+
+  const targetScreen = document.getElementById(screenId);
+  setTimeout(() => {
+    if (targetScreen) {
+      targetScreen.classList.add('active');
+      targetScreen.scrollTop = 0;
+    }
+    document.getElementById('pageTitle').textContent = pageTitles[screenId] || '';
+    updateTabBarState(screenId);
+  }, 50);
+}
+
+function updateTabBarState(screenId) {
+  document.querySelectorAll('.screen').forEach(screen => {
+    const tabs = screen.querySelectorAll('.tab-item');
+    tabs.forEach(tab => {
+      tab.classList.remove('active');
+      const label = tab.querySelector('.tab-label');
+      if (!label) return;
+      const text = label.textContent;
+      if (screenId === 'screen-home-parent' && text === '首页') tab.classList.add('active');
+      if (screenId === 'screen-list' && text === '找老师') tab.classList.add('active');
+      if (screenId === 'screen-messages' && text === '消息') tab.classList.add('active');
+      if (screenId === 'screen-mine-parent' && text === '我的') tab.classList.add('active');
+      if (screenId === 'screen-mine-student' && text === '我的') tab.classList.add('active');
+    });
+  });
+}
+
+// ===== Filter Bar =====
+function setFilter(el) {
+  el.parentElement.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// ===== Toggle Switch =====
+function toggleSwitch(el) {
+  if (el.classList.contains('on')) {
+    el.classList.remove('on');
+    el.classList.add('off');
+  } else {
+    el.classList.remove('off');
+    el.classList.add('on');
+  }
+}
+
+// ===== AI Chat =====
+const aiReplies = [
+  '好的，我来帮你分析一下这个问题。首先，你需要明确教学目标，然后根据学生的实际情况设计教学环节。建议采用"情境导入-合作探究-巩固练习-拓展提升"的四段式教学模式。\n\n需要我帮你设计具体的教学环节吗？',
+  '这是一个很好的问题！我建议你可以从以下几个方面入手：\n\n1. 📚 梳理核心知识点\n2. 🎯 设计分层练习\n3. 💡 融入生活实例\n4. ✅ 设置即时反馈\n\n你想深入了解哪个方面？',
+  '明白了！根据你的需求，我为你整理了以下教学要点：\n\n📌 重点概念要反复强调\n📌 通过图表帮助理解\n📌 设计闯关游戏激发兴趣\n📌 课后布置实践性作业\n\n这样安排你觉得如何？',
+  '好的，这道题的解题思路是这样的：\n\n第一步：审题，找出已知条件和问题\n第二步：画图或列表分析数量关系\n第三步：列出算式并计算\n第四步：检验答案是否合理\n\n记住"审题-分析-列式-检验"四步法哦！',
+  '太棒了！你已经掌握得很不错了。接下来我建议：\n\n⭐ 巩固基础题，确保正确率\n⭐ 挑战中等题，提升熟练度\n⭐ 尝试拓展题，培养思维能力\n\n保持这个节奏，进步会很快的！加油 💪'
+];
+
+let replyIndex = 0;
+
+function sendAIMessage() {
+  const input = document.getElementById('aiInput');
+  const text = input.value.trim();
+  if (!text) return;
+
+  const chatBody = document.getElementById('aiChatBody');
+
+  // Add user message
+  const userMsg = document.createElement('div');
+  userMsg.className = 'chat-msg user';
+  userMsg.innerHTML = `
+    <div class="chat-msg-avatar user-avatar">🧑‍🎓</div>
+    <div><div class="chat-bubble">${escapeHtml(text)}</div></div>
+  `;
+  chatBody.appendChild(userMsg);
+  input.value = '';
+
+  // Scroll to bottom
+  chatBody.scrollTop = chatBody.scrollHeight;
+
+  // AI typing indicator then reply
+  setTimeout(() => {
+    const aiMsg = document.createElement('div');
+    aiMsg.className = 'chat-msg assistant';
+    const reply = aiReplies[replyIndex % aiReplies.length];
+    replyIndex++;
+    aiMsg.innerHTML = `
+      <div class="chat-msg-avatar ai-avatar">🤖</div>
+      <div>
+        <div class="chat-sender">AI助手</div>
+        <div class="chat-bubble">${reply.replace(/\n/g, '<br>')}</div>
+      </div>
+    `;
+    chatBody.appendChild(aiMsg);
+    chatBody.scrollTop = chatBody.scrollHeight;
+  }, 800);
+}
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// Initialize
+document.getElementById('pageTitle').textContent = pageTitles['screen-welcome'];
+</script>
+</body>
+</html>
