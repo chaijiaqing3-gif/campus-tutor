@@ -1,3 +1,4 @@
+
 # 📚 校园家教助手
 
 > 大学生与家长直连的家教对接微信小程序产品原型
@@ -21,15 +22,15 @@
 
 | 身份选择 | 首页（家长端） | 找老师列表 |
 |:---:|:---:|:---:|
-| <img src="docs/screenshots/01-身份选择页.png" width="200"> | <img src="docs/screenshots/02-首页-家长端.png" width="200"> | <img src="docs/screenshots/03-找老师列表.png" width="200"> |
+| <img src="screenshots/01-身份选择页.png" width="200"> | <img src="screenshots/02-首页-家长端.png" width="200"> | <img src="screenshots/03-找老师列表.png" width="200"> |
 
 | 消息列表 | 教师详情 | AI教学助手 |
 |:---:|:---:|:---:|
-| <img src="docs/screenshots/04-消息列表.png" width="200"> | <img src="docs/screenshots/05-教师详情页.png" width="200"> | <img src="docs/screenshots/06-AI教学助手.png" width="200"> |
+| <img src="screenshots/04-消息列表.png" width="200"> | <img src="screenshots/05-教师详情页.png" width="200"> | <img src="screenshots/06-AI教学助手.png" width="200"> |
 
-| 我的（学生端） | 我的（家长端） | 设置页 |
+| 我的（学生端） | 设置页 | 我的（家长端） |
 |:---:|:---:|:---:|
-| <img src="docs/screenshots/07-我的-学生端.png" width="200"> | <img src="docs/screenshots/08-我的-家长端.png" width="200"> | <img src="docs/screenshots/09-设置页.png" width="200"> |
+| <img src="screenshots/07-我的-学生端.png" width="200"> | <img src="screenshots/08-我的-家长端.png" width="200"> | <img src="screenshots/09-设置页.png" width="200"> |
 
 👉 **[点击体验完整交互原型](https://chaijiaqing3-gif.github.io/campus-tutor/)** （支持页面跳转、Tab切换、AI聊天）
 
@@ -101,4 +102,3 @@
 ---
 
 > 本项目为个人产品设计作品，用于产品能力展示与面试准备。
-
